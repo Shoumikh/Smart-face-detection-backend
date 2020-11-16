@@ -2,14 +2,27 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt-nodejs");
 const cors = require("cors");
+var knex = require("knex");
+
+const db = knex({
+  client: "pg",
+  connection: {
+    host: "127.0.0.1", //this will be the address where we will host our database
+    user: "shoumikh",
+    password: "",
+    database: "smart-brain",
+  },
+}); 
+
+console.log(db.select("*").from("users"));
 
 const app = express();
 
 app.use(bodyParser.json());
 // this middleware will prevent security issaue we face when
 // accessing data of this erver from front end
-// if we do not use this middleware the front end will 
-// give in the front end console and will not allow to 
+// if we do not use this middleware the front end will
+// give in the front end console and will not allow to
 // access datas
 app.use(cors());
 
@@ -57,10 +70,11 @@ app.post("/signin", (req, res) => {
     req.body.email === users[0].email &&
     req.body.password === users[0].password
   ) {
-    res.json("success");
-  } else {
-    res.status(400).json("failed");
+    res.json(users[0]);
   }
+  //   else {
+  //     res.status(400).json("failed");
+  //   }
 });
 
 app.post("/register", (req, res) => {
@@ -73,7 +87,6 @@ app.post("/register", (req, res) => {
     id: "125",
     name: name,
     email: email,
-    password: password,
     entries: 0,
     joined: new Date(),
   });
@@ -101,7 +114,7 @@ app.get("/profile/:id", (req, res) => {
   }
 });
 
-app.post("/image", (req, res) => {
+app.put("/image", (req, res) => {
   const { id } = req.body;
   let found = false;
   users.map((user) => {
